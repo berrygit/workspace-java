@@ -6,16 +6,37 @@ import java.util.List;
 public class Client
 {
 
-    public static void main(String[] args)
-    {
-        Elevator elevator = new Elevator();
+	public static void main(String[] args)
+	{
+		Elevator elevator = new Elevator();
 
-        List<Request[]> requests = new ArrayList<Request[]>(16);
+		List<Request[]> requests = new ArrayList<Request[]>(16);
 
-        // 某一时刻可能有多个请求，也可能没有请求，requests链表将他们按照时间顺序全部封装起来，发给电梯执行。
-        for (int time = 0; time < requests.size(); time++)
-        {
-            elevator.dealRequests(requests.get(time));
-        }
-    }
+		requests.add(new Request[]
+		{ new Request(1, 2, 7) });
+
+		requests.add(null);
+
+		requests.add(new Request[]
+		{ new Request(2, 6, 5), new Request(3, 4, 8) });
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+		requests.add(null);
+
+		// 閫掑綊澶勭悊
+		for (int time = 0; time < requests.size(); time++)
+		{
+			elevator.dealRequests(requests.get(time));
+		}
+	}
 }
