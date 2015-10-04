@@ -3,61 +3,69 @@ package elevator;
 public class Request
 {
 
-    private int personID;
+	private int personID;
 
-    private int startFloor;
+	private int startFloor;
 
-    private int endFloor;
+	private int endFloor;
 
-    /**
-     * @return the personID
-     */
-    public int getPersonID()
-    {
-        return personID;
-    }
+	public Request(int personID, int startFloor, int endFloor)
+	{
+		super();
+		this.personID = personID;
+		this.startFloor = startFloor;
+		this.endFloor = endFloor;
+	}
 
-    /**
-     * @param personID
-     * the personID to set
-     */
-    public void setPersonID(int personID)
-    {
-        this.personID = personID;
-    }
+	/**
+	 * @return the personID
+	 */
+	public int getPersonID()
+	{
+		return personID;
+	}
 
-    /**
-     * @return the startFloor
-     */
-    public int getStartFloor()
-    {
-        return startFloor;
-    }
+	/**
+	 * @param personID
+	 *            the personID to set
+	 */
+	public void setPersonID(int personID)
+	{
+		this.personID = personID;
+	}
 
-    /**
-     * @param startFloor
-     * the startFloor to set
-     */
-    public void setStartFloor(int startFloor)
-    {
-        this.startFloor = startFloor;
-    }
+	/**
+	 * @return the startFloor
+	 */
+	public int getStartFloor()
+	{
+		return startFloor;
+	}
 
-    /**
-     * @return the endFloor
-     */
-    public int getEndFloor()
-    {
-        return endFloor;
-    }
+	/**
+	 * @param startFloor
+	 *            the startFloor to set
+	 */
+	public void setStartFloor(int startFloor)
+	{
+		this.startFloor = startFloor;
+	}
 
-    /**
-     * @param endFloor
-     * the endFloor to set
-     */
-    public void setEndFloor(int endFloor)
-    {
-        this.endFloor = endFloor;
-    }
+	/**
+	 * @return the endFloor
+	 */
+	public int getEndFloor()
+	{
+		return endFloor;
+	}
+
+	/**
+	 * @param endFloor
+	 *            the endFloor to set
+	 */
+	public void setEndFloor(int endFloor)
+	{
+		this.endFloor = endFloor;
+	}
 
 }

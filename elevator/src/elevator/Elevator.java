@@ -6,166 +6,390 @@ import java.util.List;
 public class Elevator
 {
 
-    private static final int DOWN_STATE = -1;
+	private static final int DOWN_STATE = -1;
 
-    private static final int STOP_STATE = 0;
+	private static final int STOP_STATE = 0;
 
-    private static final int UP_STATE = 1;
+	private static final int UP_STATE = 1;
 
-    /**
-     * µçÌİËùÔÚÂ¥²ã
-     */
-    private int floor;
+	/**
+	 * ç”µæ¢¯æ‰€åœ¨æ¥¼å±‚
+	 */
+	private int floor;
 
-    /**
-     * µçÌİÔËĞĞ·½Ïò£¬0±íÊ¾¾²Ö¹£¬1±íÊ¾ÏòÉÏ£¬-1±íÊ¾ÏòÏÂ¡£
-     */
-    private int direction;
+	/**
+	 * ç”µæ¢¯è¿è¡Œæ–¹å‘ï¼Œ1è¡¨ç¤ºå‘ä¸Šï¼Œ0è¡¨ç¤ºåœæ­¢ï¼Œ-1è¡¨ç¤ºå‘ä¸‹
+	 */
+	private int direction;
 
-    private int time;
+	/**
+	 * ä¸Šä¸€ä¸ªç”µæ¢¯è¿è¡Œæ–¹å‘
+	 */
+	private int preDirection;
 
-    private List<Request> insidePersonList;
+	private int time;
 
-    private List<Request> outsidePersonList;
+	private List<Request> insidePersonList;
 
-    public Elevator()
-    {
-        floor = 1;
-        direction = 0;
-        time = 0;
-        insidePersonList = new ArrayList<>(16);
-        outsidePersonList = new ArrayList<>(16);
-    }
+	private List<Request> outsidePersonList;
 
-    public void dealRequests(Request... requests)
-    {
-        // µÚÒ»´Î½ÓÊÜÇëÇó£¬ÎªÊ±¿Ì1¡£
-        time++;
+	public Elevator()
+	{
+		floor = 1;
+		direction = 0;
+		preDirection = 0;
+		time = 0;
+		insidePersonList = new ArrayList<>(16);
+		outsidePersonList = new ArrayList<>(16);
+	}
 
-        isAnyoneWantLeave();
-        isAnyoneWantIn(requests);
-        chooseDirection();
-        move();
-    }
+	public void dealRequests(Request... requests)
+	{
+		// ä»0æ—¶åˆ»å¼€å§‹è®¡æ—¶é—´
+		time++;
 
-    private void chooseDirection()
-    {
-    	if(!isAnyoneIn()&&!isAnyoneOutside())
-    	{
-    		direction=STOP_STATE;
-    	}
-    	
-    	
-    }
+		isAnyoneWantLeave();
+		isAnyoneWantIn(requests);
+		chooseDirection();
+		move();
+	}
 
-    private void move()
-    {
-    }
+	private void chooseDirection()
+	{
+		// å¦‚æœç”µæ¢¯æ­£åœ¨è¿è¡Œï¼Œä¸æ”¹å˜å®ƒçš„è¿è¡Œæ–¹å‘ï¼Œå¦‚æœæœ‰äººä¸Šä¸‹ç”µæ¢¯ï¼Œç”µæ¢¯åœæ­¢
+		// è¿™æ—¶æˆ‘ä»¬å†é€‰æ‹©ç”µæ¢¯çš„ä¸‹ä¸€æ­¥è¿è¡Œæ–¹å‘ã€‚
+		if (direction != STOP_STATE)
+		{
+			return;
+		}
 
-    private void isAnyoneWantIn(Request... requests)
-    {
-    	// ´Ë¿ÌÈç¹ûÓĞÇëÇóÒ»²¢¼ÓÈëoutsidePersonListÖĞ
-        if (requests != null)
-        {
-            for (Request request : requests)
-            {
-                outsidePersonList.add(request);
-            }
-        }
-        
-        // Èç¹ûÍâÃæÃ»ÈË£¬Ö±½Ó·µ»Ø
-        if (!isAnyoneOutside())
-        {
-            return;
-        }
+		// å¦‚æœç”µæ¢¯ä¸ºé™æ­¢
+		if (preDirection == STOP_STATE)
+		{
+			// å°‘æ•°æœä»å¤šæ•°
+			chooseDirectionByCount(countUpInside() + countUpOutside(),
+					countDownInside() + countDownOutside());
+		}
+		else if (preDirection == UP_STATE)
+		{
+			// ä¼˜å…ˆæ»¡è¶³åŸæ–¹å‘
+			if (isUpRequestInSide() || isUpRequestOutSide())
+			{
+				direction = UP_STATE;
+				return;
+			}
 
-        // ÖğÒ»ÅĞ¶Ï
-        for (Request request : outsidePersonList)
-        {
-            if (isPersonShouldIn(request))
-            {
-                insidePersonList.add(request);
-                outsidePersonList.remove(request);
-            }
-        }
-    }
+			if (isDownRequestInSide() || isDownRequestOutSide())
+			{
+				direction = DOWN_STATE;
+			}
 
-    private boolean isPersonShouldIn(Request request)
-    {
-    	// Ä¿Ç°Â¥²ã±ØĞëÓëÆğÊ¼Â¥²ãÏàÍ¬
-        if (floor != request.getStartFloor())
-        {
-            return false;
-        }
+		}
+		else
+		{
+			// ä¼˜å…ˆæ»¡è¶³åŸæœ‰æ–¹å‘
+			if (isDownRequestInSide() || isDownRequestOutSide())
+			{
+				direction = DOWN_STATE;
+				return;
+			}
 
-        // ·½ÏòÒªÕıÈ·
-        if (isPassageWantUp(request) && direction != DOWN_STATE)
-        {
-            return true;
-        }
-        else if (isPassageWantDown(request) && direction != UP_STATE)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+			if (isUpRequestInSide() || isUpRequestOutSide())
+			{
+				direction = UP_STATE;
+			}
+		}
+	}
 
-    }
+	private boolean isUpRequestInSide()
+	{
+		boolean isRequest = false;
 
-    private void isAnyoneWantLeave()
-    {
-        // µçÌİÖĞÃ»ÈË£¬Ö±½Ó·µ»Ø
-        if (!isAnyoneIn())
-        {
-            return;
-        }
+		if (isAnyoneIn())
+		{
+			for (Request request : insidePersonList)
+			{
+				if (floor < request.getEndFloor())
+				{
+					isRequest = true;
+					break;
+				}
+			}
+		}
 
-        // µçÌİÓĞÈË£¬ÖğÒ»¼ì²éÊÇ·ñÓĞÈËÏÂµçÌİ
-        for (Request request : insidePersonList)
-        {
-            if (floor == request.getEndFloor())
-            {
-                insidePersonList.remove(request);
-            }
+		return isRequest;
+	}
 
-            System.out.println("³Ë¿Í" + request.getPersonID() + "ÔÚÊ±¿Ì" + time + "Àë¿ªµçÌİ¡£");
-        }
-    }
+	private boolean isDownRequestInSide()
+	{
+		boolean isRequest = false;
 
-    private boolean isAnyoneIn()
-    {
-        if (insidePersonList == null || insidePersonList.isEmpty())
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
+		if (isAnyoneIn())
+		{
+			for (Request request : insidePersonList)
+			{
+				if (floor > request.getEndFloor())
+				{
+					isRequest = true;
+					break;
+				}
+			}
+		}
 
-    private boolean isAnyoneOutside()
-    {
-        if (outsidePersonList == null || outsidePersonList.isEmpty())
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
+		return isRequest;
+	}
 
-    private boolean isPassageWantUp(Request request)
-    {
-        return request.getStartFloor() < request.getEndFloor();
-    }
+	private void chooseDirectionByCount(int upCount, int downCount)
+	{
+		if (upCount >= downCount)
+		{
+			direction = UP_STATE;
+		}
+		else
+		{
+			direction = DOWN_STATE;
+		}
+	}
 
-    private boolean isPassageWantDown(Request request)
-    {
-        return request.getStartFloor() > request.getEndFloor();
-    }
+	private int countDownOutside()
+	{
+		int count = 0;
 
+		if (isAnyoneOutside())
+		{
+			for (Request request : outsidePersonList)
+			{
+				if (floor > request.getStartFloor())
+				{
+					count++;
+				}
+			}
+		}
+
+		return count;
+	}
+
+	private int countUpOutside()
+	{
+		int count = 0;
+
+		if (isAnyoneOutside())
+		{
+			for (Request request : outsidePersonList)
+			{
+				if (floor < request.getStartFloor())
+				{
+					count++;
+				}
+			}
+		}
+
+		return count;
+	}
+
+	private int countDownInside()
+	{
+		int count = 0;
+
+		if (isAnyoneIn())
+		{
+			for (Request request : insidePersonList)
+			{
+				if (floor > request.getEndFloor())
+				{
+					count++;
+				}
+			}
+		}
+
+		return count;
+	}
+
+	private int countUpInside()
+	{
+		int count = 0;
+
+		if (isAnyoneIn())
+		{
+			for (Request request : insidePersonList)
+			{
+				if (floor < request.getEndFloor())
+				{
+					count++;
+				}
+			}
+		}
+
+		return count;
+	}
+
+	private boolean isDownRequestOutSide()
+	{
+		boolean isRequest = false;
+
+		if (isAnyoneOutside())
+		{
+			for (Request request : outsidePersonList)
+			{
+				if (floor > request.getStartFloor())
+				{
+					isRequest = true;
+					break;
+				}
+			}
+		}
+
+		return isRequest;
+	}
+
+	private boolean isUpRequestOutSide()
+	{
+		boolean isRequest = false;
+
+		if (isAnyoneOutside())
+		{
+			for (Request request : outsidePersonList)
+			{
+				if (floor < request.getStartFloor())
+				{
+					isRequest = true;
+					break;
+				}
+			}
+		}
+
+		return isRequest;
+	}
+
+	private void move()
+	{
+		if (direction == UP_STATE)
+		{
+			floor++;
+		}
+		else if (direction == DOWN_STATE)
+		{
+			floor--;
+		}
+	}
+
+	private void isAnyoneWantIn(Request... requests)
+	{
+		// å°†è¯·æ±‚é€ä¸ªåŠ å…¥outsidePersonListä¸­
+		if (requests != null)
+		{
+			for (Request request : requests)
+			{
+				outsidePersonList.add(request);
+			}
+		}
+
+		// å¦‚æœå¤–é¢æ²¡äººï¼Œç›´æ¥è¿”å›
+		if (!isAnyoneOutside())
+		{
+			return;
+		}
+
+		// é€ä¸€åˆ¤æ–­æ˜¯å¦è¿›ç”µæ¢¯
+		List<Request> outsideTempList = new ArrayList<Request>(
+				outsidePersonList);
+
+		for (Request request : outsideTempList)
+		{
+			if (isPersonShouldIn(request))
+			{
+				preDirection = direction;
+				direction = STOP_STATE;
+				insidePersonList.add(request);
+				outsidePersonList.remove(request);
+			}
+		}
+	}
+
+	private boolean isPersonShouldIn(Request request)
+	{
+		// åˆ¤æ–­èµ·å§‹æ¥¼å±‚æ˜¯å¦ç›¸ç¬¦
+		if (floor != request.getStartFloor())
+		{
+			return false;
+		}
+
+		// æ–¹å‘æ˜¯å¦æ­£ç¡®
+		if (isPassageWantUp(request) && direction != DOWN_STATE)
+		{
+			return true;
+		}
+		else if (isPassageWantDown(request) && direction != UP_STATE)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	private void isAnyoneWantLeave()
+	{
+		// å¦‚æœç”µæ¢¯é‡Œæ²¡äººï¼Œç›´æ¥è¿”å›
+		if (!isAnyoneIn())
+		{
+			return;
+		}
+
+		// é€ä¸€åˆ¤æ–­æ˜¯å¦æœ‰äººä¸‹ç”µæ¢¯
+		List<Request> insideTempList = new ArrayList<Request>(insidePersonList);
+
+		for (Request request : insideTempList)
+		{
+			if (floor == request.getEndFloor())
+			{
+				insidePersonList.remove(request);
+
+				System.out.println("ä¹˜å®¢" + request.getPersonID() + "åœ¨æ—¶é—´" + time
+						+ "ç¦»å¼€ç”µæ¢¯");
+			}
+		}
+
+		// å¦‚æœç”µæ¢¯é‡Œæ²¡äººï¼Œåœæ­¢ç”µæ¢¯
+		if (!isAnyoneIn())
+		{
+			preDirection = direction;
+			direction = STOP_STATE;
+		}
+	}
+
+	private boolean isAnyoneIn()
+	{
+		if (insidePersonList == null || insidePersonList.isEmpty())
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	private boolean isAnyoneOutside()
+	{
+		if (outsidePersonList == null || outsidePersonList.isEmpty())
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	private boolean isPassageWantUp(Request request)
+	{
+		return request.getStartFloor() < request.getEndFloor();
+	}
+
+	private boolean isPassageWantDown(Request request)
+	{
+		return request.getStartFloor() > request.getEndFloor();
+	}
 }
