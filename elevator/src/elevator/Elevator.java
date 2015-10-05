@@ -45,6 +45,9 @@ public class Elevator
 
 	public void dealRequests(Request... requests)
 	{
+		// 记录状态
+		preDirection = direction;
+
 		// 从0时刻开始计时间
 		time++;
 
@@ -66,6 +69,12 @@ public class Elevator
 		// 如果电梯为静止
 		if (preDirection == STOP_STATE)
 		{
+			// 里外都没人，直接返回，电梯继续静止
+			if (!isAnyoneInside() && !isAnyoneOutside())
+			{
+				return;
+			}
+
 			// 少数服从多数
 			chooseDirectionByCount(countUpInside() + countUpOutside(),
 					countDownInside() + countDownOutside());
@@ -105,7 +114,7 @@ public class Elevator
 	{
 		boolean isRequest = false;
 
-		if (isAnyoneIn())
+		if (isAnyoneInside())
 		{
 			for (Request request : insidePersonList)
 			{
@@ -124,7 +133,7 @@ public class Elevator
 	{
 		boolean isRequest = false;
 
-		if (isAnyoneIn())
+		if (isAnyoneInside())
 		{
 			for (Request request : insidePersonList)
 			{
@@ -191,7 +200,7 @@ public class Elevator
 	{
 		int count = 0;
 
-		if (isAnyoneIn())
+		if (isAnyoneInside())
 		{
 			for (Request request : insidePersonList)
 			{
@@ -209,7 +218,7 @@ public class Elevator
 	{
 		int count = 0;
 
-		if (isAnyoneIn())
+		if (isAnyoneInside())
 		{
 			for (Request request : insidePersonList)
 			{
@@ -298,7 +307,6 @@ public class Elevator
 		{
 			if (isPersonShouldIn(request))
 			{
-				preDirection = direction;
 				direction = STOP_STATE;
 				insidePersonList.add(request);
 				outsidePersonList.remove(request);
@@ -332,7 +340,7 @@ public class Elevator
 	private void isAnyoneWantLeave()
 	{
 		// 如果电梯里没人，直接返回
-		if (!isAnyoneIn())
+		if (!isAnyoneInside())
 		{
 			return;
 		}
@@ -352,14 +360,13 @@ public class Elevator
 		}
 
 		// 如果电梯里没人，停止电梯
-		if (!isAnyoneIn())
+		if (!isAnyoneInside())
 		{
-			preDirection = direction;
 			direction = STOP_STATE;
 		}
 	}
 
-	private boolean isAnyoneIn()
+	private boolean isAnyoneInside()
 	{
 		if (insidePersonList == null || insidePersonList.isEmpty())
 		{
